@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'vk_groups',
 ]
 
 MIDDLEWARE = [
@@ -73,10 +75,20 @@ WSGI_APPLICATION = 'vk_group_info.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': 'mydatabase',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'admin'),
+        'NAME': os.environ.get('DB_NAME', 'postgres')
     }
 }
 
@@ -123,3 +135,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 VK_API_ACCESS_TOKEN = os.environ.get("VK_API_ACCESS_TOKEN")
+
+REDIS_URL = "redis://localhost:6379"
+REDIS_EX_TIME = None

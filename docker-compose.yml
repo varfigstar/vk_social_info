@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: "redis:latest"
+    ports:
+    - 6379:6379
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+        POSTGRES_PASSWORD: admin
+    ports:
+    - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

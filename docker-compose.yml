@@ -12,14 +12,9 @@ services:
     ports:
     - 5432:5432
 
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh run.sh
     volumes:
       - .:/code
     ports:
@@ -31,6 +26,8 @@ services:
       - DB_HOST=db
       - VK_API_ACCESS_TOKEN=${VK_API_ACCESS_TOKEN}
       - REDIS_URL=redis://redis:6379
+      - REDIS_EX_TIME=5
+      - SCHEDULER_REFRESH_TIME=30
     depends_on:
       - db
       - redis

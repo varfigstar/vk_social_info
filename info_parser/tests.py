@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from django.test import TestCase
 
@@ -36,6 +37,7 @@ class TestParser(TestCase):
             test_data["id"],
             test_data
         ))
+        self.parser.redis_cli.set(test_data["id"], json.dumps(test_data), ex=self.parser.ex_time)
 
         result = self.parser._get_data_from_redis(group_id=test_data["id"])
 

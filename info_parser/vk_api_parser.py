@@ -36,6 +36,14 @@ def get_group_info_from_api(group_id: str) -> dict:
     return resp_data[0]
 
 
+def parse_response(response_data: dict):
+    group_data = dict()
+    group_data["id"] = response_data["screen_name"]
+    group_data["title"] = response_data["name"]
+    group_data["user_count"] = response_data["members_count"]
+    return group_data
+
+
 class Parser:
     def __init__(self):
         self.redis_cli = Redis.from_url(settings.REDIS_URL)
@@ -61,17 +69,10 @@ class Parser:
         if data:
             return json.loads(data)
 
-    def _parse_response(self, response_data: dict):
-        group_data = dict()
-        group_data["id"] = response_data["id"]
-        group_data["title"] = response_data["name"]
-        group_data["user_count"] = response_data["members_count"]
-        return group_data
-
     async def _get_data_from_db(self, group_id: str) -> dict:
         try:
             data = await sync_to_async(VkGroupModel.objects.get, thread_sensitive=True)(id=group_id)
-        except:
+        except Exception as ex:
             return
         if data:
             data = VkGroupSerializer(data, many=False).data
@@ -79,15 +80,18 @@ class Parser:
 
     async def create_new_group(self, group_id: str, data: dict):
         await sync_to_async(VkGroupModel.objects.create, thread_sensitive=True)(**data)
-        self.redis_cli.set(group_id, json.dumps(data), ex=self.ex_time)
 
     async def get_group_info(self, group_id: str) -> dict:
         data = self._get_data_from_redis(group_id)
+        cached = bool(data)
         if not data:
             data = await self._get_data_from_db(group_id)
         if not data:
             data = get_group_info_from_api(group_id)
-            data = self._parse_response(data)
+            data = parse_response(data)
             await self.create_new_group(group_id, data)
+
+        if not cached:
+            self.redis_cli.set(group_id, json.dumps(data), ex=self.ex_time)
 
         return data

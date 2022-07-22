@@ -17,3 +17,20 @@ services:
     restart: always
     ports:
       - 8080:8080
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_HOST=db
+      - VK_API_ACCESS_TOKEN=${VK_API_ACCESS_TOKEN}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis

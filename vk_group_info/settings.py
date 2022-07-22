@@ -136,5 +136,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 VK_API_ACCESS_TOKEN = os.environ.get("VK_API_ACCESS_TOKEN")
 
-REDIS_URL = "redis://localhost:6379"
-REDIS_EX_TIME = None
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+REDIS_EX_TIME = os.environ.get("REDIS_EX_TIME")

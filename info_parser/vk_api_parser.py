@@ -1,6 +1,7 @@
+import asyncio
 import json
 
-import requests
+import aiohttp
 from redis import Redis
 from django.conf import settings
 from asgiref.sync import sync_to_async
@@ -23,13 +24,15 @@ def create_url(access_token: str, method: str):
     )
 
 
-def get_group_info_from_api(group_id: str) -> dict:
+async def get_group_info_from_api(group_id: str) -> dict:
     """
     Получает информацию сообщества от API
     """
     url = create_url(settings.VK_API_ACCESS_TOKEN, "groups.getById")
-    resp = requests.get(url, params={"group_id": group_id, "fields": "members_count"}).json()
-    resp_data = resp.get("response")
+    params = {"group_id": group_id, "fields": "members_count"}
+    async with aiohttp.ClientSession().get(url, params=params) as resp:
+        resp_data = await resp.json()
+        resp_data = resp_data.get("response")
     if not resp_data:
         error = resp.get("error").get("error_msg")
         raise GroupNotFoundException(error)
@@ -49,20 +52,6 @@ class Parser:
     def __init__(self):
         self.redis_cli = Redis.from_url(settings.REDIS_URL)
         self.ex_time = settings.REDIS_EX_TIME
-        tasks_counter = self.redis_cli.get("TASKS_COUNTER")
-        if not tasks_counter:
-            self.redis_cli.set("TASKS_COUNTER", 0)
-
-    def start_task(self):
-        counter = int((self.redis_cli.get("TASKS_COUNTER")))
-        self.redis_cli.set("TASKS_COUNTER", counter+1)
-
-    def ack_task(self):
-        counter = int(self.redis_cli.get("TASKS_COUNTER"))
-        self.redis_cli.set("TASKS_COUNTER", counter-1)
-
-    def get_tasks_counter(self) -> int:
-        return int((self.redis_cli.get("TASKS_COUNTER")))
 
     def _get_data_from_redis(self, group_id: str) -> dict:
         data = self.redis_cli.get(group_id)
@@ -89,7 +78,7 @@ class Parser:
         if not data:
             data = await self._get_data_from_db(group_id)
         if not data:
-            data = get_group_info_from_api(group_id)
+            data = await get_group_info_from_api(group_id)
             data = parse_response(data)
             await sync_to_async(self.create_new_group)(data)
 

@@ -14,7 +14,7 @@ services:
 
   web:
     build: .
-    command: sh run.sh
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
@@ -30,4 +30,33 @@ services:
       - SCHEDULER_REFRESH_TIME=30
     depends_on:
       - db
+      - redis
+      - celery
+
+  updater:
+    build: .
+    command: python -m info_updates_parser.updates_parser
+    volumes:
+    - .:/code
+    environment:
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_HOST=db
+      - VK_API_ACCESS_TOKEN=${VK_API_ACCESS_TOKEN}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_EX_TIME=5
+      - SCHEDULER_REFRESH_TIME=30
+
+  celery_app:
+    build: .
+    command: celery -A vk_group_info worker --loglevel=info --pool=solo
+    volumes:
+    - .:/code
+    environment:
+      - CELERY_BROKER=redis://redis:6379
+      - CELERY_BACKEND=redis://redis:6379
+      - REDIS_URL=redis://redis:6379
+
+    depends_on:
       - redis

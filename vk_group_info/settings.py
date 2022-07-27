@@ -88,7 +88,7 @@ DATABASES = {
         'USER': os.environ.get('DB_USER', 'postgres'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'admin'),
-        'NAME': os.environ.get('DB_NAME', 'postgres')
+        'NAME': os.environ.get('DB_NAME', 'postgres'),
     }
 }
 
@@ -142,3 +142,6 @@ if REDIS_EX_TIME:
     REDIS_EX_TIME = int(REDIS_EX_TIME)
 
 SCHEDULER_REFRESH_TIME = int(os.environ.get("SCHEDULER_REFRESH_TIME", 30))
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", REDIS_URL)
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BACKEND", REDIS_URL)

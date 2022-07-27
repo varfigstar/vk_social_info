@@ -23,10 +23,14 @@ def update_group_data(group_data):
     new_data = get_group_info_from_api(group_data["id"])
     new_data = parse_response(new_data)
 
+    group = VkGroupModel.objects.get(id=group_data["id"])
+
     if new_data != group_data:
-        group = VkGroupModel.objects.get(id=group_data["id"])
         group.title = new_data["title"]
         group.user_count = new_data["user_count"]
+        group.last_update_at = datetime.datetime.now()
+        group.save()
+    else:
         group.last_update_at = datetime.datetime.now()
         group.save()
 

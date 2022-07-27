@@ -7,6 +7,7 @@ from asgiref.sync import sync_to_async
 
 from vk_groups.models import VkGroupModel
 from vk_groups.serializers import VkGroupSerializer
+from tasks.db_tasks import create_new_group
 
 
 API_VERSION = "5.131"
@@ -78,8 +79,9 @@ class Parser:
             data = VkGroupSerializer(data, many=False).data
             return data
 
-    async def create_new_group(self, group_id: str, data: dict):
-        await sync_to_async(VkGroupModel.objects.create, thread_sensitive=True)(**data)
+    def create_new_group(self, data: dict):
+        task = create_new_group.delay(data)
+        return task
 
     async def get_group_info(self, group_id: str) -> dict:
         data = self._get_data_from_redis(group_id)
@@ -89,7 +91,7 @@ class Parser:
         if not data:
             data = get_group_info_from_api(group_id)
             data = parse_response(data)
-            await self.create_new_group(group_id, data)
+            self.create_new_group(data)
 
         if not cached:
             self.redis_cli.set(group_id, json.dumps(data), ex=self.ex_time)

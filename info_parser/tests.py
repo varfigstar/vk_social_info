@@ -33,10 +33,9 @@ class TestParser(TestCase):
                 "user_count": 100,
                 "title": "test title"
             }
-        asyncio.run(self.parser.create_new_group(
-            test_data["id"],
+        self.parser.create_new_group(
             test_data
-        ))
+        )
         self.parser.redis_cli.set(test_data["id"], json.dumps(test_data), ex=self.parser.ex_time)
 
         result = self.parser._get_data_from_redis(group_id=test_data["id"])
@@ -50,11 +49,8 @@ class TestParser(TestCase):
             "title": "test title db"
         }
         
-        asyncio.run(
-            self.parser.create_new_group(
-                test_data["id"],
+        self.parser.create_new_group(
                 test_data
-            )
         )
         
         result = asyncio.run(self.parser._get_data_from_db(test_data["id"]))

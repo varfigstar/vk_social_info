@@ -26,10 +26,10 @@ services:
       - DB_HOST=db
       - VK_API_ACCESS_TOKEN=${VK_API_ACCESS_TOKEN}
       - REDIS_URL=redis://redis:6379
-      - REDIS_EX_TIME=5
+      - REDIS_EX_TIME=60
       - CELERY_BROKER=redis://redis:6379
       - CELERY_BACKEND=redis://redis:6379
-      - SCHEDULER_REFRESH_TIME=30
+      - SCHEDULER_REFRESH_TIME=60
     depends_on:
       - db
       - redis
@@ -47,7 +47,7 @@ services:
       - VK_API_ACCESS_TOKEN=${VK_API_ACCESS_TOKEN}
       - REDIS_URL=redis://redis:6379
       - REDIS_EX_TIME=5
-      - SCHEDULER_REFRESH_TIME=30
+      - SCHEDULER_REFRESH_TIME=3
 
   celery_app:
     build: .

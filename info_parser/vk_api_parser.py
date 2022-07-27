@@ -7,7 +7,7 @@ from asgiref.sync import sync_to_async
 
 from vk_groups.models import VkGroupModel
 from vk_groups.serializers import VkGroupSerializer
-from tasks.db_tasks import create_new_group
+from vk_group_info.tasks import create_new_group
 
 
 API_VERSION = "5.131"

@@ -1,7 +1,8 @@
 from django.test import TestCase
 
-from .updates_parser import update_group_data, get_groups
+from .updates_parser import get_groups
 from vk_groups.models import VkGroupModel
+from vk_group_info.tasks import update_group
 
 
 class UpdatesParserTestCase(TestCase):
@@ -21,7 +22,7 @@ class UpdatesParserTestCase(TestCase):
     def test_update_group_data(self):
         test_data = dict(id="it_joke", user_count=100, title="IT Юмор")
         VkGroupModel.objects.create(**test_data)
-        update_group_data(test_data)
+        update_group.run(test_data)
         group = VkGroupModel.objects.get(id=test_data["id"])
         assert group.user_count > test_data["user_count"]
 

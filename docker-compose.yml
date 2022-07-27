@@ -27,11 +27,12 @@ services:
       - VK_API_ACCESS_TOKEN=${VK_API_ACCESS_TOKEN}
       - REDIS_URL=redis://redis:6379
       - REDIS_EX_TIME=5
+      - CELERY_BROKER=redis://redis:6379
+      - CELERY_BACKEND=redis://redis:6379
       - SCHEDULER_REFRESH_TIME=30
     depends_on:
       - db
       - redis
-      - celery
 
   updater:
     build: .
@@ -50,7 +51,7 @@ services:
 
   celery_app:
     build: .
-    command: celery -A vk_group_info worker --loglevel=info --pool=solo
+    command: celery -A vk_group_info.celery worker -l DEBUG --pool=solo
     volumes:
     - .:/code
     environment:

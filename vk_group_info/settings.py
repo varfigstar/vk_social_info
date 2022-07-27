@@ -145,3 +145,5 @@ SCHEDULER_REFRESH_TIME = int(os.environ.get("SCHEDULER_REFRESH_TIME", 30))
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", REDIS_URL)
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_BACKEND", REDIS_URL)
+
+UPDATER_TIME_DELTA = 300  # Сколько должно пройти секунд, чтобы updater взял в работу группу

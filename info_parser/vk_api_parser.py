@@ -91,7 +91,7 @@ class Parser:
         if not data:
             data = get_group_info_from_api(group_id)
             data = parse_response(data)
-            self.create_new_group(data)
+            await sync_to_async(self.create_new_group)(data)
 
         if not cached:
             self.redis_cli.set(group_id, json.dumps(data), ex=self.ex_time)

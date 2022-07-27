@@ -13,4 +13,5 @@ class VkGroupModel(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["id"]),
+            models.Index(fields=["last_update_at"]),
         ]

@@ -2,11 +2,13 @@
 Получает записи из БД с группами
 и отправляет их на актуализацию
 """
+import asyncio
 import datetime
 import os
 import time
 
 import django
+from asgiref.sync import sync_to_async
 from celery import shared_task
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'vk_group_info.settings'
@@ -28,13 +30,13 @@ def get_groups() -> list:
     return groups
 
 
-def start():
+async def start():
     while True:
-        groups = get_groups()
+        groups = await sync_to_async(get_groups)()
 
         for group in groups:
             try:
-                new_data = get_group_info_from_api(group["id"])
+                new_data = await get_group_info_from_api(group["id"])
                 new_data = parse_response(new_data)
                 update_group.delay(group, new_data)
             except Exception as ex:
@@ -44,4 +46,4 @@ def start():
 
 
 if __name__ == "__main__":
-    start()
+    asyncio.run(start())

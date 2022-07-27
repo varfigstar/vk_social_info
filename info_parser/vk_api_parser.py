@@ -4,12 +4,11 @@ import json
 import aiohttp
 from redis import Redis
 from django.conf import settings
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 
 from vk_groups.models import VkGroupModel
 from vk_groups.serializers import VkGroupSerializer
 from vk_group_info.tasks import create_new_group
-
 
 API_VERSION = "5.131"
 
@@ -31,8 +30,8 @@ async def get_group_info_from_api(group_id: str) -> dict:
     url = create_url(settings.VK_API_ACCESS_TOKEN, "groups.getById")
     params = {"group_id": group_id, "fields": "members_count"}
     async with aiohttp.ClientSession().get(url, params=params) as resp:
-        resp_data = await resp.json()
-        resp_data = resp_data.get("response")
+        resp = await resp.json()
+        resp_data = resp.get("response")
     if not resp_data:
         error = resp.get("error").get("error_msg")
         raise GroupNotFoundException(error)
@@ -52,6 +51,7 @@ class Parser:
     def __init__(self):
         self.redis_cli = Redis.from_url(settings.REDIS_URL)
         self.ex_time = settings.REDIS_EX_TIME
+        self.tasks = []
 
     def _get_data_from_redis(self, group_id: str) -> dict:
         data = self.redis_cli.get(group_id)

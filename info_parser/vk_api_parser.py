@@ -80,7 +80,7 @@ class Parser:
             return data
 
     def create_new_group(self, data: dict):
-        task = create_new_group.delay(data)
+        task = create_new_group.run(data)
         return task
 
     async def get_group_info(self, group_id: str) -> dict:
